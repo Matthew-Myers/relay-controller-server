@@ -7,3 +7,5 @@ edition = "2021"
 
 [dependencies]
 gpio = "0.4.1"
+json = "0.12.4"
+rouille = "3.6.2"

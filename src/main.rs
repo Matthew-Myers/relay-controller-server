@@ -1,11 +1,54 @@
 extern crate gpio;
 
+use rouille::router;
+use rouille::Request;
+use rouille::Response;
+
+
 use gpio::{GpioIn, GpioOut};
 use std::{thread, time};
 
-fn main () {
-    // Let's open GPIO23 and -24, e.g. on a Raspberry Pi 2.
-    let mut gpio24 = gpio::sysfs::SysFsGpioOutput::open(21).unwrap();
+fn main() {
+    print!("STARTING SERVER ON PORT 80");
+    rouille::start_server("0.0.0.0:80", move |request| {
+        let response = note_routes(&request);
+        response
+    });
+}
+
+fn note_routes(request: &Request) -> Response {
+    router!(request,
+
+
+        (GET) (/helloworld) => {
+            // This route returns the list of notes. We perform the query and output it as JSON.
+
+            let message = "hello world";
+
+            Response::json(&message)
+        },
+
+
+        (GET) (/helloworld2) => {
+            // This route returns the list of notes. We perform the query and output it as JSON.
+
+            let message = "hello world 2";
+
+            Response::json(&message)
+        },
+
+
+
+        // If none of the other blocks matches the request, return a 404 response.
+        _ => Response::empty_404()
+    )
+}
+
+
+
+/*
+    // Let's open GPIO21 and -24, e.g. on a Raspberry Pi 2.
+    let mut gpio21 = gpio::sysfs::SysFsGpioOutput::open(21).unwrap();
 
     let mut value = false;
 
@@ -20,4 +63,4 @@ fn main () {
     loop {
         thread::sleep(time::Duration::from_millis(100));
     }
-}
+}*/
