@@ -24,6 +24,21 @@ fn note_routes(request: &Request) -> Response {
             // This route returns the list of notes. We perform the query and output it as JSON.
 
             let message = "hello world";
+            let mut gpio21 = gpio::sysfs::SysFsGpioOutput::open(21).unwrap();
+
+            let mut value = false;
+            
+            thread::spawn(move || loop {
+                gpio21.set_value(value).expect("could not set gpio24");
+                println!("toggle");
+                thread::sleep(time::Duration::from_millis(1000));
+                value = !value;
+            });
+        
+            // The main thread will simply display the current value of GPIO23 every 100ms.
+            loop {
+                thread::sleep(time::Duration::from_millis(100));
+            }
 
             Response::json(&message)
         },
@@ -48,19 +63,5 @@ fn note_routes(request: &Request) -> Response {
 
 /*
     // Let's open GPIO21 and -24, e.g. on a Raspberry Pi 2.
-    let mut gpio21 = gpio::sysfs::SysFsGpioOutput::open(21).unwrap();
 
-    let mut value = false;
-
-    thread::spawn(move || loop {
-        gpio24.set_value(value).expect("could not set gpio24");
-        println!("toggle");
-        thread::sleep(time::Duration::from_millis(1000));
-        value = !value;
-    });
-
-    // The main thread will simply display the current value of GPIO23 every 100ms.
-    loop {
-        thread::sleep(time::Duration::from_millis(100));
-    }
 }*/
