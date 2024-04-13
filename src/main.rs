@@ -10,10 +10,25 @@ use std::{thread, time};
 
 fn main() {
     print!("STARTING SERVER ON PORT 80");
-    rouille::start_server("0.0.0.0:80", move |request| {
+    let mut gpio21 = gpio::sysfs::SysFsGpioOutput::open(21).unwrap();
+
+    rouille::start_server("0.0.0.0:8000", move |request| {
         let response = note_routes(&request);
         response
     });
+    let mut value = false;
+            
+    thread::spawn(move || loop {
+        gpio21.set_value(value).expect("could not set gpio24");
+        println!("toggle");
+        thread::sleep(time::Duration::from_millis(1000));
+        value = !value;
+    });
+
+    // The main thread will simply display the current value of GPIO23 every 100ms.
+    loop {
+        thread::sleep(time::Duration::from_millis(100));
+    }
 }
 
 fn note_routes(request: &Request) -> Response {
@@ -24,21 +39,7 @@ fn note_routes(request: &Request) -> Response {
             // This route returns the list of notes. We perform the query and output it as JSON.
 
             let message = "hello world";
-            let mut gpio21 = gpio::sysfs::SysFsGpioOutput::open(21).unwrap();
 
-            let mut value = false;
-            
-            thread::spawn(move || loop {
-                gpio21.set_value(value).expect("could not set gpio24");
-                println!("toggle");
-                thread::sleep(time::Duration::from_millis(1000));
-                value = !value;
-            });
-        
-            // The main thread will simply display the current value of GPIO23 every 100ms.
-            loop {
-                thread::sleep(time::Duration::from_millis(100));
-            }
 
             Response::json(&message)
         },
