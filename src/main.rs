@@ -1,4 +1,3 @@
-extern crate gpio;
 
 use rouille::router;
 use rouille::Request;
@@ -12,10 +11,6 @@ fn main() {
     print!("STARTING SERVER ON PORT 80");
     let mut gpio21 = gpio::sysfs::SysFsGpioOutput::open(21).unwrap();
 
-    rouille::start_server("0.0.0.0:8000", move |request| {
-        let response = note_routes(&request);
-        response
-    });
     let mut value = false;
             
     thread::spawn(move || loop {
