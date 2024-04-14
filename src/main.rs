@@ -1,22 +1,40 @@
+use std::error::Error;
+use std::thread;
+use std::time::Duration;
+use actix_web::{get, web, App, HttpServer, Responder};
 
-use gpio::{GpioIn, GpioOut};
-use std::{thread, time};
-
-fn main() {
-    print!("STARTING SERVER ON PORT 80");
-    let mut gpio21 = gpio::sysfs::SysFsGpioOutput::open(22).unwrap();
-
-    let mut value = false;
-            
-    thread::spawn(move || loop {
-        gpio21.set_value(value).expect("could not set gpio24");
-        println!("toggle");
-        thread::sleep(time::Duration::from_millis(1000));
-        value = !value;
-    });
-
-    // The main thread will simply display the current value of GPIO23 every 100ms.
-    loop {
-        thread::sleep(time::Duration::from_millis(100));
-    }
+#[get("/hello/{name}")]
+async fn greet(name: web::Path<String>) -> impl Responder {
+    let _ = blink()
+    format!("Hello {name}!")
 }
+
+use rppal::gpio::Gpio;
+use rppal::system::DeviceInfo;
+
+// Gpio uses BCM pin numbering. BCM GPIO 23 is tied to physical pin 16.
+const GPIO_LED: u8 = 21;
+const mut pin = Gpio::new()?.get(GPIO_LED)?.into_output();
+
+
+#[actix_web::main] // or #[tokio::main]
+async fn main() -> std::io::Result<()> {
+    HttpServer::new(|| {
+        App::new().service(greet)
+    })
+    .bind(("0.0.0.0", 8080))?
+    .run()
+    .await
+}
+
+fn blink() -> Result<(), Box<dyn Error>> {
+    println!("Blinking an LED on a {}.", DeviceInfo::new()?.model());
+
+    // Blink the LED by setting the pin's logic level high for 500 ms.
+    pin.set_high();
+    thread::sleep(Duration::from_millis(500));
+    pin.set_low();
+
+    Ok(())
+}
+
