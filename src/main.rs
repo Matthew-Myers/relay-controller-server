@@ -4,7 +4,7 @@ use std::{thread, time};
 
 fn main() {
     print!("STARTING SERVER ON PORT 80");
-    let mut gpio21 = gpio::sysfs::SysFsGpioOutput::open(21).unwrap();
+    let mut gpio21 = gpio::sysfs::SysFsGpioOutput::open(22).unwrap();
 
     let mut value = false;
             
