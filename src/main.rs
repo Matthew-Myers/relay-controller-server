@@ -1,9 +1,4 @@
 
-use rouille::router;
-use rouille::Request;
-use rouille::Response;
-
-
 use gpio::{GpioIn, GpioOut};
 use std::{thread, time};
 
@@ -25,39 +20,3 @@ fn main() {
         thread::sleep(time::Duration::from_millis(100));
     }
 }
-
-fn note_routes(request: &Request) -> Response {
-    router!(request,
-
-
-        (GET) (/helloworld) => {
-            // This route returns the list of notes. We perform the query and output it as JSON.
-
-            let message = "hello world";
-
-
-            Response::json(&message)
-        },
-
-
-        (GET) (/helloworld2) => {
-            // This route returns the list of notes. We perform the query and output it as JSON.
-
-            let message = "hello world 2";
-
-            Response::json(&message)
-        },
-
-
-
-        // If none of the other blocks matches the request, return a 404 response.
-        _ => Response::empty_404()
-    )
-}
-
-
-
-/*
-    // Let's open GPIO21 and -24, e.g. on a Raspberry Pi 2.
-
-}*/
